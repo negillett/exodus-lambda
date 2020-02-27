@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      # Create Lambda@Edge function package
+      - pip install --target ./package .
+      # Copy function configuration and CloudFormation template
+      - cp cdn_lambda/functions/map_to_s3/map_to_s3.json ./package
+      - cp cdn_lambda/origin-request-deploy.yaml ./package
+  build:
+    commands:
+      # Create deployment configuration from CloudFormation template
+      - cd package
+      - aws cloudformation package
+        --template-file ./origin-request-deploy.yaml
+        --s3-bucket exodus-lambda-artifacts
+        --output-template-file ../origin-request-pkg.yaml
+artifacts:
+  files:
+    - origin-request-pkg.yaml

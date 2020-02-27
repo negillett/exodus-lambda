@@ -13,6 +13,7 @@ class LambdaClient(object):
 
         self._conf = None
         self._db_client = None
+        self._pipeline_client = None
 
     @property
     def conf(self):
@@ -31,10 +32,46 @@ class LambdaClient(object):
 
         return self._db_client
 
+    @property
+    def pipeline_client(self):
+        if not self._pipeline_client:
+            self._pipeline_client = boto3.client("codepipeline")
+
+        return self._pipeline_client
+
+    def report_success(self, job, message):
+        LOG.info(message)
+
+        if job:
+            self.pipeline_client.put_job_success_result(
+                jobId=job["id"], executionDetails={"summary": message}
+            )
+
+    def report_failure(self, job, message):
+        LOG.info(message)
+
+        if job:
+            self.pipeline_client.put_job_failure_result(
+                jobId=job["id"],
+                failureDetails={"type": "JobFailed", "message": message},
+            )
+
     def handler(self, event, context):
         # pylint: disable=unused-argument
 
-        request = event["Records"][0]["cf"]["request"]
+        # Permit invocation from AWS CodePipeline
+        job = event.get("CodePipeline.job", None) or None
+
+        if job:
+            # AWS CodePipeline structure
+            request = {
+                "uri": job["data"]["actionConfiguration"]["configuration"][
+                    "UserParameters"
+                ]
+            }
+        else:
+            # AWS CloudFront structure
+            request = event["Records"][0]["cf"]["request"]
 
         LOG.info(
             "Querying '%s' table for '%s'...",
@@ -68,16 +105,22 @@ class LambdaClient(object):
                     "/" + query_result["Items"][0]["object_key"]["S"]
                 )
 
+                self.report_success(job, "Retrieved %s" % request["uri"])
+
                 return request
             except Exception as err:
-                LOG.exception(
-                    "Exception occurred while processing %s",
-                    json.dumps(query_result["Items"][0]),
+                message = (
+                    "Exception occurred while processing %s"
+                    % json.dumps(query_result["Items"][0])
                 )
+
+                self.report_failure(job, message)
 
                 raise err
         else:
-            LOG.info("No item found for '%s'", request["uri"])
+            message = "No item found for '%s'" % request["uri"]
+
+            self.report_failure(job, message)
 
             # Report 404 to prevent attempts on S3
             return {

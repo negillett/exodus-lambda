@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: Configuration for origin-request Lambda@Edge deployment
+
+Parameters:
+  Function:
+    Type: String
+    Default: map_to_s3
+    Description: Function to deploy
+  Env:
+    Type: String
+    AllowedValues:
+      - stage
+      - prod
+    Default: stage
+    Description: Environment to deploy function in
+
+Resources:
+  OriginRequestDist:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub ${Env} - CI/CD for Lambda@Edge
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          LambdaFunctionAssociations:
+            - EventType: origin-request
+              LambdaFunctionARN: !Ref OriginRequestFunc.Version
+          TargetOriginId: S3-caleigh-test
+          ViewerProtocolPolicy: redirect-to-https
+        Enabled: 'true'
+        HttpVersion: http2
+        Origins:
+          -
+            DomainName: caleigh-test.s3.amazonaws.com
+            Id: S3-caleigh-test
+            S3OriginConfig:
+              OriginAccessIdentity: origin-access-identity/cloudfront/ENXOB0TUJ1XEU
+
+  OriginRequestFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub origin_request-${Function}
+      CodeUri:
+      Handler: cdn_lambda.origin_request
+      Role: arn:aws:iam::333296168829:role/lambda
+      Runtime: python3.7
+      Timeout: 5
+      AutoPublishAlias: live
+
+Outputs:
+  OriginRequestFunc:
+    Description: Lambda@Edge Function ARN with Version
+    Value: !Ref OriginRequestFunc.Version
+
+  OriginRequestDist:
+    Description: Cloudfront Distribution Domain Name
+    Value: !GetAtt OriginRequestDist.DomainName
