@@ -4,13 +4,13 @@
 #
 #    pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 #
-boto3==1.17.44 \
-    --hash=sha256:e74da1da74fbefbe2db7a9c53082018d862433f35e2ecd4c173632efc5742f40 \
-    --hash=sha256:ffb9b192b2b52ab88cde09e2af7d9fd6e541287e5719098be97ffd7144f47eb1
+boto3==1.17.49 \
+    --hash=sha256:a482135c30fa07eaf4370314dd0fb49117222a266d0423b2075aed3835ed1f04 \
+    --hash=sha256:d5ef160442925f5944e4cde88589f0f195f6c284f05613114fc6bbc35e342fa7
     # via -r requirements.in
-botocore==1.20.44 \
-    --hash=sha256:2958e3912939558fd789a64b23a10039d8b0c0c84a23b573f3f2e3154de357ad \
-    --hash=sha256:8a7f85bf05ad62551b0e6dfeeec471147b330cb2b5c7f48795057e811e6a2e77
+botocore==1.20.49 \
+    --hash=sha256:6a672ba41dd00e5c1c1824ca8143d180d88de8736d78c0b1f96b8d3cb0466561 \
+    --hash=sha256:f7f103fa0651c69dd360c7d0ecd874854303de5cc0869e0cbc2818a52baacc69
     # via
     #   -r requirements.in
     #   boto3
@@ -26,9 +26,9 @@ chardet==4.0.0 \
     --hash=sha256:0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa \
     --hash=sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5
     # via requests
-docutils==0.17 \
-    --hash=sha256:a71042bb7207c03d5647f280427f14bfbd1a65c9eb84f4b341d85fafb6bb4bdf \
-    --hash=sha256:e2ffeea817964356ba4470efba7c2f42b6b0de0b04e66378507e3e2504bbff4c
+docutils==0.17.1 \
+    --hash=sha256:686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125 \
+    --hash=sha256:cf316c8370a737a022b72b56874f6602acf974a37a9fba42ec2876387549fc61
     # via -r requirements.in
 idna==2.10 \
     --hash=sha256:b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6 \
